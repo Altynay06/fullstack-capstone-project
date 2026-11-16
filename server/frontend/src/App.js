@@ -1,3 +1,4 @@
+import Auth from './components/Register/Register';
 import React, {useEffect, useState} from 'react';
 import {Routes, Route, Link, useNavigate, useParams} from 'react-router-dom';
 import './App.css';
@@ -16,11 +17,9 @@ function App() {
   useEffect(()=>{api('session').then(data=>{setUser(data.userName); if(data.userName) sessionStorage.setItem('username',data.userName); else sessionStorage.removeItem('username');}).catch(()=>{});},[]);
   const signedIn = data => {sessionStorage.setItem('username', data.userName); setUser(data.userName); navigate('/');};
   const signOut = async () => {try {await api('logout',{}); sessionStorage.removeItem('username'); setUser(''); window.alert('You have been logged out.'); navigate('/');} catch(e) {window.alert(e.message);}};
-  return <><header><Link className="brand" to="/">Best Cars</Link><nav><Link to="/">Dealerships</Link><Link to="/about">About Us</Link><Link to="/contact">Contact Us</Link></nav><div>{user ? <><strong>{user}</strong> <button onClick={signOut}>Logout</button></> : <><Link to="/login">Login</Link> · <Link to="/register">Sign up</Link></>}</div></header>
+  return <><header><Link className="brand" to="/">Best Cars</Link><nav><Link to="/">Dealerships</Link><a href="/about">About Us</a><a href="/contact">Contact Us</a></nav><div>{user ? <><strong>{user}</strong> <button onClick={signOut}>Logout</button></> : <><Link to="/login">Login</Link> · <Link to="/register">Sign up</Link></>}</div></header>
   <main><Routes>
     <Route path="/" element={<Dealers user={user}/>}/>
-    <Route path="/about" element={<About/>}/>
-    <Route path="/contact" element={<><h1>Contact Us</h1><p>Questions about a vehicle or dealership? Contact the Best Cars support team.</p><p>Email: support@bestcars.example</p><p>Hours: Monday–Friday, 9:00–17:00</p><p>This is an educational demonstration. Contact details are illustrative.</p></>}/>
     <Route path="/login" element={<Auth signedIn={signedIn}/>}/>
     <Route path="/register" element={<Auth register signedIn={signedIn}/>}/>
     <Route path="/dealer/:id" element={<Dealer user={user}/>}/>
@@ -28,24 +27,7 @@ function App() {
     <Route path="*" element={<><h1>Page not found</h1><Link to="/">Return home</Link></>}/>
   </Routes></main><footer>Best Cars · Full Stack Capstone Project</footer></>;
 }
-function About() {
-  return <><h1>About Us</h1><p>Best Cars helps drivers explore dealerships, compare customer experiences, and share reviews after buying a vehicle.</p><img className="hero" src="/static/car_dealership.jpg" alt="Cars at a dealership"/><h2>Our team</h2><div className="cards">{[['Customer experience','We help customers find useful dealership information.'],['Engineering','We build the platform and its supporting services.'],['Dealer relations','We connect customer feedback with dealership teams.']].map(([name, text]) => <article key={name}><h3>{name}</h3><p>{text}</p></article>)}</div></>;
-}
-function Auth({register=false,signedIn}) {
-  const [error,setError]=useState('');
-  const [busy,setBusy]=useState(false);
-  async function submit(e) {
-    e.preventDefault(); setBusy(true); setError('');
-    const fields=Object.fromEntries(new FormData(e.currentTarget));
-    try {signedIn(await api(register?'register':'login',fields));} catch(e) {setError(e.message);} finally {setBusy(false);}
-  }
-  return <section className="form"><h1>{register?'Create an account':'Login'}</h1><form onSubmit={submit}>
-    {register && <><label>First name<input required name="firstName" autoComplete="given-name"/></label><label>Last name<input required name="lastName" autoComplete="family-name"/></label><label>Email<input required type="email" name="email" autoComplete="email"/></label></>}
-    <label>Username<input required name="userName" autoComplete="username"/></label>
-    <label>Password<input required type="password" name="password" minLength={register?8:undefined} autoComplete={register?'new-password':'current-password'}/></label>
-    {error && <p role="alert" className="error">{error}</p>}<button disabled={busy}>{busy?'Please wait…':register?'Sign up':'Login'}</button>
-  </form>{!register&&<p>New here? <Link to="/register">Create an account</Link></p>}</section>;
-}
+
 function Dealers({user}) {
   const [dealers,setDealers]=useState([]); const [state,setState]=useState('All'); const [error,setError]=useState(''); const [loading,setLoading]=useState(true);
   useEffect(()=>{api('get_dealers').then(data=>setDealers(data.dealers)).catch(e=>setError(e.message)).finally(()=>setLoading(false));},[]);
