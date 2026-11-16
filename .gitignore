@@ -1,0 +1,13 @@
+.venv/
+.python/
+.uv-cache/
+node_modules/
+build/
+__pycache__/
+*.pyc
+*.sqlite3
+.env
+server/static/
+evidence/
+.mongo-binaries/
+.mongo-data/
